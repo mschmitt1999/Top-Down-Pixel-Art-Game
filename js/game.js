@@ -441,22 +441,72 @@ var GotNoteScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
+     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png');
+     this.load.image('schnippselImage', 'assets/Plakatschnippsel/Plakatschnipsel_18.jpg')
     },
 
     create: function ()
     {      
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.add.image(0,0, 'collectedObjectsImage')         
+        
+        // Get the dimensions of the game canvas
+        var canvasWidth = this.sys.game.config.width;
+        var canvasHeight = this.sys.game.config.height;
+
+       
+        var image = this.add.image(canvasWidth / 2, canvasHeight / 2, 'collectedObjectsImage');
+        
+        //image.setScale(0.5); 
+
+       // image.setOrigin(0.5, 0.5);
+
+       this.add.text(canvasWidth / 2, canvasHeight / 2.5, 'Du hast eine Notiz gefunden!', {fontSize: '32px', fill: '#ffffff'}).setOrigin(0.5,0.5);
+        
+
+       // Add a button below the text
+        var showNoteButton = this.add.text(canvasWidth / 2, canvasHeight / 2 + 50, 'Notiz anzeigen', {
+            fontSize: '24px',
+            fill: '#ffffff',
+            backgroundColor: '#00ff00', // You can set the button background color
+            padding: {
+                x: 20, // Increase the horizontal padding
+                y: 15  // Increase the vertical padding
+            }
+        }).setOrigin(0.5, 0.5);
+
+        // Make the button interactive
+        showNoteButton.setInteractive();
+
+        // Set up a callback for the button click event
+        showNoteButton.on('pointerup', function () {
+            this.add.image(canvasWidth / 2, canvasHeight / 2, 'schnippselImage');
+        }, this);
+
+
+        var exitButton = this.add.text(canvasWidth - 20, 20, 'Exit', {
+            fontSize: '24px',
+            fill: '#ffffff',
+            backgroundColor: '#00ff00', // Set the button background color
+            padding: {
+                x: 20, // Increase the horizontal padding
+                y: 15  // Increase the vertical padding
+            }
+        }).setOrigin(1, 0); // Set origin to top right
+        
+        // Make the exit button interactive
+        exitButton.setInteractive();
+        
+        // Set up a callback for the exit button click event
+        exitButton.on('pointerup', function () {
+            this.scene.resume('WorldScene');
+            this.scene.stop();
+        }, this);
+
     },
 
     
     update: function (time, delta)
     {
-        if(this.cursors.down.isDown){
-            this.scene.resume('WorldScene');
-            this.scene.stop();
-        }
     }
 });
 
@@ -474,22 +524,20 @@ var YouWonScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
+     this.load.image('winImage', 'assets/POPUP WIN.png')   
     },
 
     create: function ()
     {      
         this.cursors = this.input.keyboard.createCursorKeys();
-       // this.add.image(0,0, 'collectedObjectsImage')         
+        var canvasWidth = this.sys.game.config.width;
+        var canvasHeight = this.sys.game.config.height;
+        var image = this.add.image(canvasWidth / 2, canvasHeight / 2, 'winImage');       
     },
 
     
     update: function (time, delta)
     {
-        if(this.cursors.down.isDown){
-            this.scene.resume('WorldScene');
-            this.scene.stop();
-        }
     }
 });
 
@@ -507,22 +555,20 @@ var GameOverScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
+     this.load.image('loseImage', 'assets/POPUP GAME OVER.png')   
     },
 
     create: function ()
     {      
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.add.image(0,0, 'collectedObjectsImage')         
+        var canvasWidth = this.sys.game.config.width;
+        var canvasHeight = this.sys.game.config.height;
+        var image = this.add.image(canvasWidth / 2, canvasHeight / 2, 'loseImage');     
     },
 
     
     update: function (time, delta)
     {
-        if(this.cursors.down.isDown){
-            this.scene.resume('WorldScene');
-            this.scene.stop();
-        }
     }
 });
 
