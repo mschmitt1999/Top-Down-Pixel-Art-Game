@@ -7,47 +7,67 @@ var WorldScene = new Phaser.Class({
     function WorldScene ()
     {
         Phaser.Scene.call(this, { key: 'WorldScene' });
+
+        //____________Variables for map__________
+        var map;
+        var floorsAndWallsTiles;
+        var furnitureState1Tiles;
+        var furnitureState2Tiles;
+        var smallItemsTiles;
+        var enemyWayTiles;
+       
+       /// Layer
+        var ground;
+        var furniture1;
+        var furniture11;
+        var furniture2;
+        var smallItems;
+        var enemyWay;
+        //____________________
+
         var enemy;
         var enemyWayTilesCollection; 
         var theEnemyWayLayerDataArray ;
         var posX;
         var posY; 
         var lastSelectedXY;
-        var playersLife;
         var lifes;
         var hearts;
-        var numberOfWaitsToUpdate;
         var target;
-        //var renderTexture;
-        //var brush;
     },
 
 
     preload: function ()
     {
-         // _________MAP___________
-         //map tiles
+  
         this.preloadAllTilesAndMap();
-         // _________________________
-         // _________player_____
-         // load spritesheet of character
-         this.load.spritesheet('player', 'assets/CHARACTER.png', { frameWidth: 16, frameHeight: 16 });
-         //______________________
-        //_______objectsToCollect__________
+   
+        this.load.spritesheet('player', 'assets/CHARACTER.png', { frameWidth: 16, frameHeight: 16 });
+        
         this.load.image('objectsToCollect', 'assets/PAPER.png');
 
         this.load.image('heart', 'assets/herz.png');
 
-        //_______________________Enemy________________-
         this.load.spritesheet('enemy', 'assets/CHARACTER.png', { frameWidth: 16, frameHeight: 16 });
-
-
-
-        this.load.image('darkBackground', 'assets/darkBackground.png');
-        this.load.image('brush', 'assets/brush.png');
-
-
     },
+
+    create: function ()
+    {
+        this.initializeMap();
+        this.initializePlayerCharacter();
+        this.initializeCameraMovement();
+        this.initializeObjectsToCollect();
+        this.initializeEnemy();
+        this.initializeHearts();
+        this.cursors = this.input.keyboard.createCursorKeys();
+    },
+
+    update: function (time, delta)
+    {            
+            this.updatePlayerCharacter();
+            this.updateEnemy();
+    },
+
 
     preloadAllTilesAndMap: function(){
         this.load.image('smallItemsTiles', 'assets/map/TopDownHouse_SmallItems.png');
@@ -55,44 +75,46 @@ var WorldScene = new Phaser.Class({
         this.load.image('furnitureState1Tiles', 'assets/map/TopDownHouse_FurnitureState1.png');
         this.load.image('floorsAndWallsTiles', 'assets/map/TopDownHouse_FloorsAndWalls.png');
         this.load.image('doorsAndWindowsTiles', 'assets/map/TopDownHouse_DoorsAndWindows.png');    
-        // map in json format
-       this.load.tilemapTiledJSON('map', 'assets/map/libaryMap.json');
+        this.load.tilemapTiledJSON('map', 'assets/map/libaryMap.json');
     },
 
-    create: function ()
-    {
-        // create the map
-        var map = this.make.tilemap({ key: 'map' });
+    initializeMap: function(){
+         // create the map
+        map = this.make.tilemap({ key: 'map' });
       
-       //mapTileset --> name in json file
-       //tiles image key from preload
-        var floorsAndWallsTiles = map.addTilesetImage('TopDownHouse_FloorsAndWalls', 'floorsAndWallsTiles',16,16);
-        var furnitureState1Tiles = map.addTilesetImage('TopDownHouse_FurnitureState1', 'furnitureState1Tiles',16,16);
-        var furnitureState2Tiles = map.addTilesetImage('TopDownHouse_FurnitureState2', 'furnitureState2Tiles',16,16);
-        var smallItemsTiles = map.addTilesetImage('TopDownHouse_SmallItems','smallItemsTiles');
-        var enemyWayTiles = map.addTilesetImage('TopDownHouse_DoorsAndWindows','doorsAndWindowsTiles',16,16);
-       
-       /// creating the layers       
-        var ground = map.createStaticLayer('FloorAndWalls', floorsAndWallsTiles, 0, 0);
-        var furniture1 = map.createStaticLayer('Furniture1', furnitureState1Tiles, 0,0);
-        var furniture11 = map.createStaticLayer('Furniture1.1', furnitureState1Tiles, 0,0);
-        var furniture2 = map.createStaticLayer('Furniture2', furnitureState2Tiles, 0,0);
-        var smallItems = map.createStaticLayer('Smallitems', smallItemsTiles, 0,0);
-        var enemyWay = map.createStaticLayer('TilesForEnemy',enemyWayTiles,0,0);
-
-        // make all tiles in obstacles collidable
+         //mapTileset --> name in json file
+         //tiles image key from preload
+        floorsAndWallsTiles = map.addTilesetImage('TopDownHouse_FloorsAndWalls', 'floorsAndWallsTiles',16,16);
+        furnitureState1Tiles = map.addTilesetImage('TopDownHouse_FurnitureState1', 'furnitureState1Tiles',16,16);
+        furnitureState2Tiles = map.addTilesetImage('TopDownHouse_FurnitureState2', 'furnitureState2Tiles',16,16);
+        smallItemsTiles = map.addTilesetImage('TopDownHouse_SmallItems','smallItemsTiles');
+        enemyWayTiles = map.addTilesetImage('TopDownHouse_DoorsAndWindows','doorsAndWindowsTiles',16,16);
+         
+         /// creating the layers       
+        ground = map.createStaticLayer('FloorAndWalls', floorsAndWallsTiles, 0, 0);
+        furniture1 = map.createStaticLayer('Furniture1', furnitureState1Tiles, 0,0);
+        furniture11 = map.createStaticLayer('Furniture1.1', furnitureState1Tiles, 0,0);
+        furniture2 = map.createStaticLayer('Furniture2', furnitureState2Tiles, 0,0);
+        smallItems = map.createStaticLayer('Smallitems', smallItemsTiles, 0,0);
+        enemyWay = map.createStaticLayer('TilesForEnemy',enemyWayTiles,0,0);
+  
         furniture1.setCollisionByExclusion([-1]);
         furniture11.setCollisionByExclusion([-1]);
         furniture2.setCollisionByExclusion([-1]);
 
-       this.anims.create({
+        furniture1.setDepth(1);
+        furniture2.setDepth(1);
+        furniture11.setDepth(1);
+        smallItems.setDepth(1);
+    },
+
+    initializeAnimationsForPlayer: function(){
+        this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('player', {frames: [2, 8, 2, 9]}),
             frameRate: 10,
             repeat: -1
        });
-
-        // animation with key 'right'
         this.anims.create({
             key: 'right',
             frames: this.anims.generateFrameNumbers('player', {frames: [2, 8, 2, 9]}),
@@ -111,138 +133,123 @@ var WorldScene = new Phaser.Class({
             frameRate: 10,
             repeat: -1
         });
-    
-        //create player sprite(x, y, key, frame number)
+    },
+
+    initializePlayerCharacter: function(){
         this.player = this.physics.add.sprite(500, 500, 'player', 6);
         this.player.setScale(2);
-        playersLife = 100;
 
-        // don't go out of the map
         this.physics.world.bounds.width = map.widthInPixels;
         this.physics.world.bounds.height = map.heightInPixels;
         this.player.setCollideWorldBounds(true);
 
-        //collide with trees
         this.physics.add.collider(this.player, furniture1);
         this.physics.add.collider(this.player, furniture2);
+        this.player.setDepth(1);
+        this.initializeAnimationsForPlayer();
+    },
 
-        //camera movement
-        //camera bounds
+    initializeCameraMovement: function(){
         this.cameras.main.setBounds(0,0,map.widthInPixels, map.heightInPixels);
-        //follow player
         this.cameras.main.startFollow(this.player);
-        // avoid tile bleed
         this.cameras.main.roundPixels = true; 
+    },
 
+    initializeObjectsToCollect: function(){
+         //__________ObjectsToCollect___________
 
-        //keyboard input 
-        this.cursors = this.input.keyboard.createCursorKeys();
-
-        //__________ObjectsToCollect___________
-
-        var objectsToCollect = this.physics.add.group({
+         var objectsToCollect = this.physics.add.group({
             key: 'objectsToCollect', 
             repeat: 9,
         });
         objectsToCollect.children.entries.forEach(eachObjectToCollect => {
-            var positionOfObjectsTOCollect = getRandomPositionWithoutCollidingWithTile();
+            var positionOfObjectsTOCollect = this.getRandomPositionWithoutCollidingWithTile();
             eachObjectToCollect.setPosition(positionOfObjectsTOCollect[0], positionOfObjectsTOCollect[1]);
             eachObjectToCollect.setOrigin(0,0);
         }); 
 
        this.physics.add.overlap(this.player, objectsToCollect, collectObject, null, this);
        
-       //object to collect under the furniture
-       furniture1.setDepth(1);
-       furniture2.setDepth(1);
-       this.player.setDepth(1);
-       
-       function getRandomPositionWithoutCollidingWithTile(){
-           do{ 
-            var x = parseInt(Math.random() * 30);
-            var y = parseInt(Math.random() * 30);
-           }
-           while(furniture1.getTileAt(x,y)!= null 
-                || furniture1.getTileAt(x-1,y)!= null 
-                || furniture1.getTileAt(x+1,y)!= null 
-                || furniture1.getTileAt(x,y+1)!= null 
-                || furniture1.getTileAt(x,y-1)!= null 
-                || furniture1.getTileAt(x+1,y+1)!= null
-                || furniture1.getTileAt(x-1,y-1)!= null
-                || furniture2.getTileAt(x,y)!= null 
-                || furniture2.getTileAt(x-1,y)!= null 
-                || furniture2.getTileAt(x+1,y)!= null 
-                || furniture2.getTileAt(x,y+1)!= null 
-                || furniture2.getTileAt(x,y-1)!= null 
-                || furniture2.getTileAt(x+1,y+1)!= null
-                || furniture2.getTileAt(x-1,y-1)!= null )
-           x*=16;
-           y*=16;
-           return [x,y];
-       }
-
        function collectObject(player, overlappingObjectsToCollect){
-        //Parameter are objects which overlap
             overlappingObjectsToCollect.disableBody(true, true);
 
             if(objectsToCollect.countActive(true) === 0){
-                //Game Winning Scene
                 this.scene.launch('YouWonScene');
                 this.scene.pause();
             }else{
                 this.scene.launch('GotNoteScene');
                 this.scene.pause();
             }
-            
         }
+    },
 
-       //___________________ENEMY__________________
-       numberOfWaitsToUpdate = 20;
+    getRandomPositionWithoutCollidingWithTile: function(){
+        do{ 
+         var x = parseInt(Math.random() * 30);
+         var y = parseInt(Math.random() * 30);
+        }
+        while(furniture1.getTileAt(x,y)!= null 
+             || furniture1.getTileAt(x-1,y)!= null 
+             || furniture1.getTileAt(x+1,y)!= null 
+             || furniture1.getTileAt(x,y+1)!= null 
+             || furniture1.getTileAt(x,y-1)!= null 
+             || furniture1.getTileAt(x+1,y+1)!= null
+             || furniture1.getTileAt(x-1,y-1)!= null
+             || furniture2.getTileAt(x,y)!= null 
+             || furniture2.getTileAt(x-1,y)!= null 
+             || furniture2.getTileAt(x+1,y)!= null 
+             || furniture2.getTileAt(x,y+1)!= null 
+             || furniture2.getTileAt(x,y-1)!= null 
+             || furniture2.getTileAt(x+1,y+1)!= null
+             || furniture2.getTileAt(x-1,y-1)!= null )
+        x*=16;
+        y*=16;
+        return [x,y];
+    },
 
+    initializeEnemy: function(){
+        //___________________ENEMY__________________
        enemyWayTilesCollection = [];
-        enemyWay.layer.data.forEach(eachRow => {
-            eachRow.forEach(eachTile => {
-                if(eachTile.index == 61){
-                    enemyWayTilesCollection.push(eachTile);
-                }
-            })
-        });
-        posX = enemyWayTilesCollection[0].x;
-        posY = enemyWayTilesCollection[0].y;
-        enemy = this.physics.add.sprite(enemyWayTilesCollection[0].x*16, enemyWayTilesCollection[0].y*16, 'enemy', 6);
-        enemy.setScale(2);
-        enemy.setDepth(1);
-        this.physics.add.overlap(this.player, enemy, enemyGotYou, null, this);
-        //this.physics.add.overlap(this.player, enemy, enemyGotYou, null, this);
+       enemyWay.layer.data.forEach(eachRow => {
+           eachRow.forEach(eachTile => {
+               if(eachTile.index == 61){
+                   enemyWayTilesCollection.push(eachTile);
+               }
+           })
+       });
+       posX = enemyWayTilesCollection[0].x;
+       posY = enemyWayTilesCollection[0].y;
+       enemy = this.physics.add.sprite(enemyWayTilesCollection[0].x*16, enemyWayTilesCollection[0].y*16, 'enemy', 6);
+       enemy.setScale(2);
+       enemy.setDepth(1);
+       this.physics.add.overlap(this.player, enemy, enemyGotYou, null, this);
 
-        theEnemyWayLayerDataArray =  enemyWay.layer.data;
-    
-        lastSelectedXY = [-1,-1];
-       // lifes = 3;
-        var playerIsImmune = false;
-        function enemyGotYou(player, enemy){
-            if(!playerIsImmune){
-                enemy.body.setVelocity(0);
-                //funktioniert nicht weil in update direkt wieder umestellt
-                player.body.setVelocityX(160);
-                this.player.setTint(0xf54e42);
+       theEnemyWayLayerDataArray =  enemyWay.layer.data;
+   
+       lastSelectedXY = [-1,-1];
+       var playerIsImmune = false;
+       function enemyGotYou(player, enemy){
+           if(!playerIsImmune){
+               this.player.setTint(0xf54e42);
 
-                console.log(lifes[lifes.length -1]);
-                lifes[lifes.length -1].destroy();
-                lifes.pop();
-                console.log(lifes.length);
-                if(lifes.length == 0){
-                    this.scene.launch('GameOverScene');
-                    this.scene.pause();
-                }
-                playerIsImmune = true;
-                this.time.delayedCall(500, function(player) {
-                    playerIsImmune = false;
-                    player.setTint(0xffffff);
-                }, [this.player]);
-            }                
-        }
+               console.log(lifes[lifes.length -1]);
+               lifes[lifes.length -1].destroy();
+               lifes.pop();
+               if(lifes.length == 0){
+                   this.scene.launch('GameOverScene');
+                   this.scene.pause();
+               }
+               playerIsImmune = true;
+               this.time.delayedCall(500, function(player) {
+                   playerIsImmune = false;
+                   player.setTint(0xffffff);
+               }, [this.player]);
+           }                
+       }
+       this.initializeAnimationsForEnemy();
+    },
 
+    initializeAnimationsForEnemy: function(){
         this.anims.create({
             key: 'leftEnemy',
             frames: this.anims.generateFrameNumbers('enemy', {frames: [12, 18, 12, 19]}),
@@ -269,161 +276,110 @@ var WorldScene = new Phaser.Class({
             frameRate: 10,
             repeat: -1
         });
+    },
 
-       /* const brush = this.make.sprite({key:'brush', add: false}).setScale(16);
-
-        var cover = this.add.image(0,0,'darkBackground');
-        cover.setDepth(1);
-
-        const rt = this.make.renderTexture({x: 0, y: 0, width: 2000, height: 2000, add: false}).setOrigin(0.0);
-        cover.mask = new Phaser.Display.Masks.BitmapMask(this, rt);
-        cover.mask.invertAlpha = true;
-
-        this.input.on('pointermove', function (event) {
-            if (event.isDown)
-            {
-                rt.draw(brush, event.x, event.y);
-            }
-        }, this);*/
-
-       /* hearts = this.physics.add.group({
-            key: 'heart', 
-            repeat: 2,
-            setXY: {x: 0, y:0, stepX: 16},
-        });
-        hearts.children.entries.forEach(eachHeart => {
-            eachHeart.setDepth(1);
-            eachHeart.setOrigin(0,0);
-            eachHeart.setScrollFactor(0,0);
-        }); */
-        
+    initializeHearts: function(){
         lifes = []
         for(i=0; i<3; i++){
-            let eachHeart = this.add.image(i*16, 0, 'heart');
+            let eachHeart = this.add.image(i*40, 0, 'heart');
             eachHeart.setDepth(1);
             eachHeart.setOrigin(0,0);
             eachHeart.setScrollFactor(0,0);
+            eachHeart.setScale(2);
             lifes.push(eachHeart);
         }
-        
     },
 
-    update: function (time, delta)
-    {            
-            this.player.body.setVelocity(0);
+    updatePlayerCharacter: function(){
+        this.player.body.setVelocity(0);
             
-            // Horizontal movement
-            if (this.cursors.left.isDown)
-            {
-                this.player.body.setVelocityX(-160);
-            }
-            else if (this.cursors.right.isDown)
-            {
-                this.player.body.setVelocityX(160);
-            }
-            // Vertical movement
-            if (this.cursors.up.isDown)
-            {
-                this.player.body.setVelocityY(-160);
-            }
-            else if (this.cursors.down.isDown)
-            {
-                this.player.body.setVelocityY(160);
-            }        
+        // Horizontal movement
+        if (this.cursors.left.isDown)
+        {
+            this.player.body.setVelocityX(-160);
+        }
+        else if (this.cursors.right.isDown)
+        {
+            this.player.body.setVelocityX(160);
+        }
+        // Vertical movement
+        if (this.cursors.up.isDown)
+        {
+            this.player.body.setVelocityY(-160);
+        }
+        else if (this.cursors.down.isDown)
+        {
+            this.player.body.setVelocityY(160);
+        }        
 
-            // Update the animation last and give left/right animations precedence over up/down animations
-            if (this.cursors.left.isDown)
-            {
-                this.player.anims.play('left', true);
-                this.player.flipX = true;
-            }
-            else if (this.cursors.right.isDown)
-            {
-                this.player.anims.play('right', true);
-                this.player.flipX = false;
-            }
-            else if (this.cursors.up.isDown)
-            {
-                this.player.anims.play('up', true);
-            }
-            else if (this.cursors.down.isDown)
-            {
-                this.player.anims.play('down', true);
-            }
-            else
-            {
-                this.player.anims.stop();
-            }
-            if(Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y)<= 80){
-                this.physics.moveToObject(enemy, this.player, 100);
-            }
-            else{
-              //  enemy.body.reset(enemy.x, enemy.y);
-                this.enemyMovement(enemy);           
-            }
-            if(playersLife <= 0){
-                this.scene.launch('GameOverScene');
-                this.scene.pause();
-            }
-
+        // Update the animation last and give left/right animations precedence over up/down animations
+        if (this.cursors.left.isDown)
+        {
+            this.player.anims.play('left', true);
+            this.player.flipX = true;
+        }
+        else if (this.cursors.right.isDown)
+        {
+            this.player.anims.play('right', true);
+            this.player.flipX = false;
+        }
+        else if (this.cursors.up.isDown)
+        {
+            this.player.anims.play('up', true);
+        }
+        else if (this.cursors.down.isDown)
+        {
+            this.player.anims.play('down', true);
+        }
+        else
+        {
+            this.player.anims.stop();
+        }
     },
 
-    enemyFollowPlayer: function(enemy){
-        this.physics.moveToObject(enemy, this.player);
+    updateEnemy: function(){
+        if(Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y)<= 80){
+            this.physics.moveToObject(enemy, this.player, 100);
+        }
+        else{
+            this.enemyMovement(enemy);           
+        }
     },
 
-    enemyMovement: function(enemy){
-                const tolerance = 4;        
-               
+    enemyMovement: function(enemy){               
                 target  = new Phaser.Math.Vector2();
                 target.x= posX*16;
                 target.y= posY*16;
                 
-
-                console.log('Enemy X: ', Math.round(enemy.x) , ' Enemy Y: ', Math.round(enemy.y));
-                console.log('Pos X: ', posX , ' Pos Y: ', posY);
-                console.log(posX*16 <=Math.round(enemy.x) &&Math.round(enemy.x) <= posX*16+32  &&Math.round(enemy.y) >= posY*16 &&Math.round(enemy.y) <= posY*16+32);
-                console.log(theEnemyWayLayerDataArray);
-
-
-
                 if(posX*16 <=Math.round(enemy.x) &&Math.round(enemy.x) <= posX*16+32  &&Math.round(enemy.y) >= posY*16 &&Math.round(enemy.y) <= posY*16+32){
                     if( theEnemyWayLayerDataArray[posY].length -1 > posX + 1  && theEnemyWayLayerDataArray[posY][posX+1].index == 61 && !(lastSelectedXY[1] == posY && lastSelectedXY[0] == posX +1 )){
                         lastSelectedXY = [posX, posY];
                         enemy.anims.play('rightEnemy',true);
                         enemy.flipX = false;
                         posX +=1;
-                        console.log('right');
                     }
                     else if(theEnemyWayLayerDataArray.length -1 > posY + 1  && theEnemyWayLayerDataArray[posY+1][posX].index == 61 && !(lastSelectedXY[1] == posY +1 && lastSelectedXY[0] == posX )){
                         lastSelectedXY = [posX, posY];
                         enemy.anims.play('downEnemy',true);
                         posY +=1;
-                        console.log('down');
                     }
                     else if(0 <= posX - 1  && theEnemyWayLayerDataArray[posY][posX-1].index == 61 && !(lastSelectedXY[1] == posY  && lastSelectedXY[0] == posX -1)){
                         lastSelectedXY = [posX, posY];
                         enemy.anims.play('leftEnemy',true);
                         enemy.flipX = true;
                         posX -=1;
-                        console.log('left');
                     }
                     else if(0 <= posY - 1  && theEnemyWayLayerDataArray[posY-1][posX].index == 61 && !(lastSelectedXY[1] == posY -1 && lastSelectedXY[0] == posX )){
                         lastSelectedXY = [posX, posY];
                         enemy.anims.play('upEnemy',true);
                         posY -=1;
-                        console.log('up');
                     }
-                    console.log('Target:', target);
                     if (enemy.body.speed > 0 && Phaser.Math.Distance.Between(enemy.x, enemy.y, posX*16, posY*16) < 10)
                     {    
                         enemy.body.reset(target.x, target.y);
                     }
                 }
-                
-                this.physics.moveToObject(enemy, target, 100);
-                
-                
+                this.physics.moveToObject(enemy, target, 100);               
     }
 });
 
@@ -448,19 +404,14 @@ var GotNoteScene = new Phaser.Class({
     create: function ()
     {      
         this.cursors = this.input.keyboard.createCursorKeys();
-        
-        // Get the dimensions of the game canvas
+    
         var canvasWidth = this.sys.game.config.width;
         var canvasHeight = this.sys.game.config.height;
 
        
         var image = this.add.image(canvasWidth / 2, canvasHeight / 2, 'collectedObjectsImage');
-        
-        //image.setScale(0.5); 
 
-       // image.setOrigin(0.5, 0.5);
-
-       this.add.text(canvasWidth / 2, canvasHeight / 2.5, 'Du hast eine Notiz gefunden!', {fontSize: '32px', fill: '#ffffff'}).setOrigin(0.5,0.5);
+        this.add.text(canvasWidth / 2, canvasHeight / 2.5, 'Du hast eine Notiz gefunden!', {fontSize: '32px', fill: '#ffffff'}).setOrigin(0.5,0.5);
         
 
        // Add a button below the text
@@ -503,7 +454,6 @@ var GotNoteScene = new Phaser.Class({
         }, this);
 
     },
-
     
     update: function (time, delta)
     {
