@@ -113,7 +113,7 @@ var WorldScene = new Phaser.Class({
         });
     
         //create player sprite(x, y, key, frame number)
-        this.player = this.physics.add.sprite(100, 50, 'player', 6);
+        this.player = this.physics.add.sprite(500, 500, 'player', 6);
         this.player.setScale(2);
         playersLife = 100;
 
