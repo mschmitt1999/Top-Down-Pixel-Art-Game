@@ -474,7 +474,7 @@ var YouWonScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/Nico/POPUP BACKGROUND.png')   
+     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
     },
 
     create: function ()
@@ -507,7 +507,7 @@ var GameOverScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/Nico/POPUP BACKGROUND.png')   
+     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
     },
 
     create: function ()
@@ -539,7 +539,7 @@ var OptionsScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/Nico/POPUP BACKGROUND.png')   
+     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
     },
 
     create: function ()
@@ -561,8 +561,8 @@ var windowWidth = window.innerWidth || document.documentElement.clientWidth || d
 var windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
 var gameDimensions = {width: 0, height: 0};
-gameDimensions.width = 600;//windowWidth;//300;//window.screen.width;
-gameDimensions.height = 500;//windowHeight; // 300;//window.screen.height;
+gameDimensions.width = 600;
+gameDimensions.height = 500;
 
 if(windowWidth < gameDimensions.width){
     gameDimensions.width = windowWidth;
@@ -576,15 +576,15 @@ console.log(gameDimensions)
 var config = {
     type: Phaser.AUTO,
     parent: 'content',
-    width: windowWidth,//gameDimensions.width,
-    height: windowHeight,//gameDimensions.height,
+    width: windowWidth,
+    height: windowHeight,
     zoom: 1,
     pixelArt: true,
     physics: {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 },
-            debug: false // set to true to view zones
+            debug: false 
         }
     },
     scene: [
