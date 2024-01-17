@@ -209,7 +209,6 @@ var WorldScene = new Phaser.Class({
         });
         posX = enemyWayTilesCollection[0].x;
         posY = enemyWayTilesCollection[0].y;
-        console.log('first');
         enemy = this.physics.add.sprite(enemyWayTilesCollection[0].x*16, enemyWayTilesCollection[0].y*16, 'enemy', 6);
         enemy.setScale(2);
         enemy.setDepth(1);
@@ -442,7 +441,7 @@ var GotNoteScene = new Phaser.Class({
 
     preload: function ()
     {
-     this.load.image('collectedObjectsImage', 'assets/Nico/POPUP BACKGROUND.png')   
+     this.load.image('collectedObjectsImage', 'assets/POPUP BACKGROUND.png')   
     },
 
     create: function ()
