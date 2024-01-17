@@ -1,0 +1,8 @@
+Credits:
+Spritesheets used from: https://penzilla.itch.io/top-down-retro-interior
+TopDownHouse_DoorsAndWindows
+TopDownHouse_FloorsAndWalls
+TopDownHouse_FurnitureState1
+TopDownHouse_FurnitureState2
+TopDownHouse_SmallItems
+
