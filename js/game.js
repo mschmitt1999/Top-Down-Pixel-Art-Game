@@ -34,6 +34,12 @@ var WorldScene = new Phaser.Class({
         var lifes;
         var hearts;
         var target;
+
+        //____Keys__________
+        var keyA;
+        var keyS;
+        var keyD;
+        var keyW;
     },
 
 
@@ -59,6 +65,7 @@ var WorldScene = new Phaser.Class({
         this.initializeObjectsToCollect();
         this.initializeEnemy();
         this.initializeHearts();
+        this.initializeKeys();
         this.cursors = this.input.keyboard.createCursorKeys();
     },
 
@@ -290,44 +297,51 @@ var WorldScene = new Phaser.Class({
         }
     },
 
+    initializeKeys: function(){
+        keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    },
+
     updatePlayerCharacter: function(){
         this.player.body.setVelocity(0);
             
         // Horizontal movement
-        if (this.cursors.left.isDown)
+        if (this.cursors.left.isDown || keyA.isDown)
         {
             this.player.body.setVelocityX(-160);
         }
-        else if (this.cursors.right.isDown)
+        else if (this.cursors.right.isDown || keyD.isDown)
         {
             this.player.body.setVelocityX(160);
         }
         // Vertical movement
-        if (this.cursors.up.isDown)
+        if (this.cursors.up.isDown ||keyW.isDown)
         {
             this.player.body.setVelocityY(-160);
         }
-        else if (this.cursors.down.isDown)
+        else if (this.cursors.down.isDown || keyS.isDown)
         {
             this.player.body.setVelocityY(160);
         }        
 
         // Update the animation last and give left/right animations precedence over up/down animations
-        if (this.cursors.left.isDown)
+        if (this.cursors.left.isDown || keyA.isDown)
         {
             this.player.anims.play('left', true);
             this.player.flipX = true;
         }
-        else if (this.cursors.right.isDown)
+        else if (this.cursors.right.isDown || keyD.isDown)
         {
             this.player.anims.play('right', true);
             this.player.flipX = false;
         }
-        else if (this.cursors.up.isDown)
+        else if (this.cursors.up.isDown || keyW.isDown)
         {
             this.player.anims.play('up', true);
         }
-        else if (this.cursors.down.isDown)
+        else if (this.cursors.down.isDown || keyS.isDown)
         {
             this.player.anims.play('down', true);
         }
