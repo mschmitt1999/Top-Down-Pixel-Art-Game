@@ -191,9 +191,10 @@ var WorldScene = new Phaser.Class({
     },
 
     getRandomPositionWithoutCollidingWithTile: function(){
+        
         do{ 
-         var x = parseInt(Math.random() * 30);
-         var y = parseInt(Math.random() * 30);
+         var x = parseInt(Math.random() * config.width/16);
+         var y = parseInt(Math.random() * config.height/16);
         }
         while(furniture1.getTileAt(x,y)!= null 
              || furniture1.getTileAt(x-1,y)!= null 
@@ -208,9 +209,17 @@ var WorldScene = new Phaser.Class({
              || furniture2.getTileAt(x,y+1)!= null 
              || furniture2.getTileAt(x,y-1)!= null 
              || furniture2.getTileAt(x+1,y+1)!= null
-             || furniture2.getTileAt(x-1,y-1)!= null )
+             || furniture2.getTileAt(x-1,y-1)!= null
+             || furniture11.getTileAt(x,y)!= null 
+             || furniture11.getTileAt(x-1,y)!= null 
+             || furniture11.getTileAt(x+1,y)!= null 
+             || furniture11.getTileAt(x,y+1)!= null 
+             || furniture11.getTileAt(x,y-1)!= null 
+             || furniture11.getTileAt(x+1,y+1)!= null
+             || furniture11.getTileAt(x-1,y-1)!= null )
         x*=16;
         y*=16;
+        console.log(x);
         return [x,y];
     },
 
