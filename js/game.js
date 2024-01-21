@@ -193,8 +193,8 @@ var WorldScene = new Phaser.Class({
     getRandomPositionWithoutCollidingWithTile: function(){
         
         do{ 
-         var x = parseInt(Math.random() * config.width/16);
-         var y = parseInt(Math.random() * config.height/16);
+         var x = parseInt(Math.random() * 120);
+         var y = parseInt(Math.random() * 120);
         }
         while(furniture1.getTileAt(x,y)!= null 
              || furniture1.getTileAt(x-1,y)!= null 
