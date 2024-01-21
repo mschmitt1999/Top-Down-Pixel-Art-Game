@@ -34,7 +34,8 @@ var WorldScene = new Phaser.Class({
         var lifes;
         var hearts;
         var target;
-
+        var objectsToCollect;
+        var gotNoteSceneAlreadyStarted;
         //____Keys__________
         var keyA;
         var keyS;
@@ -67,6 +68,7 @@ var WorldScene = new Phaser.Class({
         this.initializeHearts();
         this.initializeKeys();
         this.cursors = this.input.keyboard.createCursorKeys();
+        gotNoteSceneAlreadyStarted = false;
     },
 
     update: function (time, delta)
@@ -165,7 +167,7 @@ var WorldScene = new Phaser.Class({
     initializeObjectsToCollect: function(){
          //__________ObjectsToCollect___________
 
-         var objectsToCollect = this.physics.add.group({
+         objectsToCollect = this.physics.add.group({
             key: 'objectsToCollect', 
             repeat: 9,
         });
@@ -179,14 +181,12 @@ var WorldScene = new Phaser.Class({
        
        function collectObject(player, overlappingObjectsToCollect){
             overlappingObjectsToCollect.disableBody(true, true);
-
-            if(objectsToCollect.countActive(true) === 0){
-                this.scene.launch('YouWonScene');
-                this.scene.pause();
-            }else{
+            if(!gotNoteSceneAlreadyStarted){
+                //fixes freezing when simultaniously collecting to notes, but last note has no scene
                 this.scene.launch('GotNoteScene');
-                this.scene.pause();
             }
+            gotNoteSceneAlreadyStarted = true;
+            this.scene.pause();
         }
     },
 
@@ -219,7 +219,6 @@ var WorldScene = new Phaser.Class({
              || furniture11.getTileAt(x-1,y-1)!= null )
         x*=16;
         y*=16;
-        console.log(x);
         return [x,y];
     },
 
@@ -472,9 +471,16 @@ var GotNoteScene = new Phaser.Class({
         
         // Set up a callback for the exit button click event
         exitButton.on('pointerup', function () {
-            this.scene.resume('WorldScene');
+            gotNoteSceneAlreadyStarted = false;
             this.scene.stop();
+            this.scene.resume('WorldScene');
+            if(objectsToCollect.countActive(true) === 0){
+                this.scene.launch('YouWonScene');
+                this.scene.pause();
+            }
+
         }, this);
+
 
     },
     
