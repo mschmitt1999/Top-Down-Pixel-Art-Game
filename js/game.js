@@ -26,14 +26,12 @@ var WorldScene = new Phaser.Class({
         //____________________
 
         var enemy;
-        var enemyWayTilesCollection; 
-        var theEnemyWayLayerDataArray ;
-        var posX;
-        var posY; 
+        var firstEnemy;
+        var secondEnemy;
+        var thirdEnemy;
         var lastSelectedXY;
         var lifes;
         var hearts;
-        var target;
         var objectsToCollect;
         var gotNoteSceneAlreadyStarted;
         //____Keys__________
@@ -64,7 +62,11 @@ var WorldScene = new Phaser.Class({
         this.initializePlayerCharacter();
         this.initializeCameraMovement();
         this.initializeObjectsToCollect();
-        this.initializeEnemy();
+        firstEnemy = this.initializeEnemy(enemyWayFirst);
+        secondEnemy = this.initializeEnemy(enemyWaySecond);
+        thirdEnemy = this.initializeEnemy(enemyWayThird);
+        forthEnemy = this.initializeEnemy(enemyWayForth);
+        fifthEnemy = this.initializeEnemy(enemyWayFifth);
         this.initializeHearts();
         this.initializeKeys();
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -74,7 +76,11 @@ var WorldScene = new Phaser.Class({
     update: function (time, delta)
     {            
             this.updatePlayerCharacter();
-            this.updateEnemy();
+            this.updateEnemy(firstEnemy);
+            this.updateEnemy(secondEnemy);
+            this.updateEnemy(thirdEnemy);
+            this.updateEnemy(forthEnemy);
+            this.updateEnemy(fifthEnemy);
     },
 
 
@@ -105,7 +111,12 @@ var WorldScene = new Phaser.Class({
         furniture11 = map.createStaticLayer('Furniture1.1', furnitureState1Tiles, 0,0);
         furniture2 = map.createStaticLayer('Furniture2', furnitureState2Tiles, 0,0);
         smallItems = map.createStaticLayer('Smallitems', smallItemsTiles, 0,0);
-        enemyWay = map.createStaticLayer('TilesForEnemy',enemyWayTiles,0,0);
+        enemyWayFirst = map.createStaticLayer('TilesForEnemyFirst',enemyWayTiles,0,0);
+        enemyWaySecond = map.createStaticLayer('TilesForEnemySecond',enemyWayTiles,0,0);
+        enemyWayThird = map.createStaticLayer('TilesForEnemyThird',enemyWayTiles,0,0);
+        enemyWayForth = map.createStaticLayer('TilesForEnemyForth',enemyWayTiles,0,0);
+        enemyWayFifth = map.createStaticLayer('TilesForEnemyFifth',enemyWayTiles,0,0);
+
   
         furniture1.setCollisionByExclusion([-1]);
         furniture11.setCollisionByExclusion([-1]);
@@ -222,26 +233,14 @@ var WorldScene = new Phaser.Class({
         return [x,y];
     },
 
-    initializeEnemy: function(){
+    initializeEnemy: function(enemyWay){
         //___________________ENEMY__________________
-       enemyWayTilesCollection = [];
-       enemyWay.layer.data.forEach(eachRow => {
-           eachRow.forEach(eachTile => {
-               if(eachTile.index == 61){
-                   enemyWayTilesCollection.push(eachTile);
-               }
-           })
-       });
-       posX = enemyWayTilesCollection[0].x;
-       posY = enemyWayTilesCollection[0].y;
-       enemy = this.physics.add.sprite(enemyWayTilesCollection[0].x*16, enemyWayTilesCollection[0].y*16, 'enemy', 6);
-       enemy.setScale(2);
-       enemy.setDepth(1);
-       this.physics.add.overlap(this.player, enemy, enemyGotYou, null, this);
+        let enemySprite = this.physics.add.sprite(0,0, 'enemy', 6);
 
-       theEnemyWayLayerDataArray =  enemyWay.layer.data;
+        let enemyFirst = new Enemy(enemySprite, enemyWay.layer.data)
+
+       this.physics.add.overlap(this.player, enemyFirst.spriteCharacter, enemyGotYou, null, this);
    
-       lastSelectedXY = [-1,-1];
        var playerIsImmune = false;
        function enemyGotYou(player, enemy){
            if(!playerIsImmune){
@@ -262,6 +261,7 @@ var WorldScene = new Phaser.Class({
            }                
        }
        this.initializeAnimationsForEnemy();
+       return enemyFirst;
     },
 
     initializeAnimationsForEnemy: function(){
@@ -359,51 +359,80 @@ var WorldScene = new Phaser.Class({
         }
     },
 
-    updateEnemy: function(){
-        if(Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y)<= 80){
-            this.physics.moveToObject(enemy, this.player, 100);
+    updateEnemy: function(enemy){
+        if(Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.spriteCharacter.x, enemy.spriteCharacter.y)<= 80){
+            this.physics.moveToObject(enemy.spriteCharacter, this.player, 100);
         }
         else{
             this.enemyMovement(enemy);           
         }
     },
 
-    enemyMovement: function(enemy){               
-                target  = new Phaser.Math.Vector2();
-                target.x= posX*16;
-                target.y= posY*16;
-                
-                if(posX*16 <=Math.round(enemy.x) &&Math.round(enemy.x) <= posX*16+32  &&Math.round(enemy.y) >= posY*16 &&Math.round(enemy.y) <= posY*16+32){
-                    if( theEnemyWayLayerDataArray[posY].length -1 > posX + 1  && theEnemyWayLayerDataArray[posY][posX+1].index == 61 && !(lastSelectedXY[1] == posY && lastSelectedXY[0] == posX +1 )){
-                        lastSelectedXY = [posX, posY];
-                        enemy.anims.play('rightEnemy',true);
-                        enemy.flipX = false;
-                        posX +=1;
-                    }
-                    else if(theEnemyWayLayerDataArray.length -1 > posY + 1  && theEnemyWayLayerDataArray[posY+1][posX].index == 61 && !(lastSelectedXY[1] == posY +1 && lastSelectedXY[0] == posX )){
-                        lastSelectedXY = [posX, posY];
-                        enemy.anims.play('downEnemy',true);
-                        posY +=1;
-                    }
-                    else if(0 <= posX - 1  && theEnemyWayLayerDataArray[posY][posX-1].index == 61 && !(lastSelectedXY[1] == posY  && lastSelectedXY[0] == posX -1)){
-                        lastSelectedXY = [posX, posY];
-                        enemy.anims.play('leftEnemy',true);
-                        enemy.flipX = true;
-                        posX -=1;
-                    }
-                    else if(0 <= posY - 1  && theEnemyWayLayerDataArray[posY-1][posX].index == 61 && !(lastSelectedXY[1] == posY -1 && lastSelectedXY[0] == posX )){
-                        lastSelectedXY = [posX, posY];
-                        enemy.anims.play('upEnemy',true);
-                        posY -=1;
-                    }
-                    if (enemy.body.speed > 0 && Phaser.Math.Distance.Between(enemy.x, enemy.y, posX*16, posY*16) < 10)
-                    {    
-                        enemy.body.reset(target.x, target.y);
-                    }
-                }
-                this.physics.moveToObject(enemy, target, 100);               
+    enemyMovement: function(enemy){      
+                this.physics.moveToObject(enemy.spriteCharacter, enemy.calculateNextTarget(), 100);               
     }
 });
+
+
+class Enemy{
+    constructor(spriteCharacter, wayDataLayer){
+        this.spriteCharacter = spriteCharacter;
+        this.wayDataLayer = wayDataLayer;
+        this.lastSelectedXY = [-1,-1]; 
+        this.target  = new Phaser.Math.Vector2();
+
+        let enemyWayTilesCollection = [];
+        wayDataLayer.forEach(eachRow => {
+           eachRow.forEach(eachTile => {
+               if(eachTile.index == 61){
+                   enemyWayTilesCollection.push(eachTile);
+               }
+           })
+       });
+
+       this.positionX = enemyWayTilesCollection[0].x;
+       this.positionY = enemyWayTilesCollection[0].y;
+       spriteCharacter.setPosition(this.positionX*16, this.positionY*16);
+       spriteCharacter.setScale(2);
+       spriteCharacter.setDepth(1);
+    }
+
+    calculateNextTarget(){
+        this.target  = new Phaser.Math.Vector2();
+        this.target.x= this.positionX*16;
+        this.target.y= this.positionY*16;
+        
+        if(this.positionX*16 <=Math.round(this.spriteCharacter.x) &&Math.round(this.spriteCharacter.x) <= this.positionX*16+32  &&Math.round(this.spriteCharacter.y) >= this.positionY*16 &&Math.round(this.spriteCharacter.y) <= this.positionY*16+32){
+            if( this.wayDataLayer[this.positionY].length -1 > this.positionX + 1  && this.wayDataLayer[this.positionY][this.positionX+1].index == 61 && !(this.lastSelectedXY[1] == this.positionY && this.lastSelectedXY[0] == this.positionX +1 )){
+                this.lastSelectedXY = [this.positionX, this.positionY];
+                this.spriteCharacter.anims.play('rightEnemy',true);
+                this.spriteCharacter.flipX = false;
+                this.positionX +=1;
+            }
+            else if(this.wayDataLayer.length -1 > this.positionY + 1  && this.wayDataLayer[this.positionY+1][this.positionX].index == 61 && !(this.lastSelectedXY[1] == this.positionY +1 && this.lastSelectedXY[0] == this.positionX )){
+                this.lastSelectedXY = [this.positionX, this.positionY];
+                this.spriteCharacter.anims.play('downEnemy',true);
+                this.positionY +=1;
+            }
+            else if(0 <= this.positionX - 1  && this.wayDataLayer[this.positionY][this.positionX-1].index == 61 && !(this.lastSelectedXY[1] == this.positionY  && this.lastSelectedXY[0] == this.positionX -1)){
+                this.lastSelectedXY = [this.positionX, this.positionY];
+                this.spriteCharacter.anims.play('leftEnemy',true);
+                this.spriteCharacter.flipX = true;
+                this.positionX -=1;
+            }
+            else if(0 <= this.positionY - 1  && this.wayDataLayer[this.positionY-1][this.positionX].index == 61 && !(this.lastSelectedXY[1] == this.positionY -1 && this.lastSelectedXY[0] == this.positionX )){
+                this.lastSelectedXY = [this.positionX, this.positionY];
+                this.spriteCharacter.anims.play('upEnemy',true);
+                this.positionY -=1;
+            }
+            if (this.spriteCharacter.body.speed > 0 && Phaser.Math.Distance.Between(this.spriteCharacter.x, this.spriteCharacter.y, this.positionX*16, this.positionY*16) < 10)
+            {    
+                this.spriteCharacter.body.reset(this.target.x, this.target.y);
+            }
+        }
+        return this.target
+    }
+}
 
 
 var GotNoteScene = new Phaser.Class({
@@ -473,10 +502,12 @@ var GotNoteScene = new Phaser.Class({
         exitButton.on('pointerup', function () {
             gotNoteSceneAlreadyStarted = false;
             this.scene.stop();
-            this.scene.resume('WorldScene');
             if(objectsToCollect.countActive(true) === 0){
                 this.scene.launch('YouWonScene');
                 this.scene.pause();
+            }
+            else{
+                this.scene.resume('WorldScene');
             }
 
         }, this);
